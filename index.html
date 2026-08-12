@@ -1,17 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نتائج التوجيهي</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; }
+        input, button { padding: 10px; font-size: 18px; margin: 5px; }
+        #result { margin-top: 20px; padding: 15px; background: #f0f4f8; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔍 نتيجة التوجيهي</h1>
-        <input type="text" id="searchInput" placeholder="أدخل رقم الجلوس">
-        <button onclick="searchStudent()">بحث</button>
-        <div id="result"></div>
-    </div>
-    <script src="script.js"></script>
+    <h1>📊 نتيجة التوجيهي</h1>
+    <input type="text" id="searchInput" placeholder="أدخل رقم الجلوس">
+    <button onclick="searchStudent()">بحث</button>
+    <div id="result"></div>
+
+    <script>
+        const supabaseUrl = 'https://bcoosbeidinimlicdqru.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjb29zYmVpZGluaW1saWNkcXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0NDY0MDAsImV4cCI6MjAzMTAyMjQwMH0.TdQwV2lP3qZ4rF7sH9jK1lM5nB8vC6xY0zW3eR7tU2';
+
+        async function searchStudent() {
+            const seatNumber = document.getElementById('searchInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            if (!seatNumber) { resultDiv.innerHTML = '⚠️ أدخل رقم الجلوس'; return; }
+            resultDiv.innerHTML = '⏳ جاري البحث...';
+            try {
+                const res = await fetch(`${supabaseUrl}/rest/v1/students?seat_number=eq.${seatNumber}&select=*`, {
+                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+                });
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const s = data[0];
+                    resultDiv.innerHTML = `<h3>👤 ${s.name}</h3><p>📚 ${s.branch || ''}</p><p>⭐ ${s.average || ''}</p>`;
+                } else {
+                    resultDiv.innerHTML = '❌ رقم الجلوس غير موجود';
+                }
+            } catch (e) {
+                resultDiv.innerHTML = '⚠️ خطأ في الاتصال';
+            }
+        }
+    </script>
 </body>
 </html>
