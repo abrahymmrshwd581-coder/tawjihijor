@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>نتائج التوجيهي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 عرض النتيجة</h1>
+        <input type="text" id="searchInput" placeholder="أدخل رقم الجلوس">
+        <button onclick="searchStudent()">بحث</button>
+        <div id="result"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+<script>
+function searchStudent() {
+    let id = document.getElementById('searchInput').value;
+    let students = {
+        "1234": {name: "أحمد محمد", average: "98.5"},
+        "5678": {name: "سارة علي", average: "95.2"}
+    };
+    let result = students[id];
+    document.getElementById('result').innerHTML = result ? 
+        `<h3>${result.name}</h3><p>المعدل: ${result.average}</p>` :
+        "❌ رقم غير صحيح";
+}
+</script>
