@@ -1,30 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نتائج التوجيهي</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 450px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #1a3a5c;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 90%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        button {
+            width: 95%;
+            padding: 12px;
+            background: #2d89ef;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #1a6dc1;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f0fe;
+            border-radius: 10px;
+            font-size: 18px;
+            min-height: 60px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔍 عرض النتيجة</h1>
+        <h1>📊 نتيجة التوجيهي</h1>
         <input type="text" id="searchInput" placeholder="أدخل رقم الجلوس">
-        <button onclick="searchStudent()">بحث</button>
+        <button onclick="searchStudent()">🔍 بحث</button>
         <div id="result"></div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        const supabaseUrl = 'https://bcoosbeidinimlicdqru.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjb29zYmVpZGluaW1saWNkcXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0NDY0MDAsImV4cCI6MjAzMTAyMjQwMH0.TdQwV2lP3qZ4rF7sH9jK1lM5nB8vC6xY0zW3eR7tU2';
+
+        async function searchStudent() {
+            const seatNumber = document.getElementById('searchInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!seatNumber) {
+                resultDiv.innerHTML = '⚠️ الرجاء إدخال رقم الجلوس';
+                return;
+            }
+            
+            resultDiv.innerHTML = '⏳ جاري البحث...';
+            
+            try {
+                const response = await fetch(`${supabaseUrl}/rest/v1/students?seat_number=eq.${seatNumber}&select=*`, {
+                    headers: {
+                        'apikey': supabaseKey,
+                        'Authorization': `Bearer ${supabaseKey}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.length > 0) {
+                    const student = data[0];
+                    resultDiv.innerHTML = `
+                        <h3>👤 ${student.name}</h3>
+                        <p>📚 الفرع: ${student.branch || 'غير محدد'}</p>
+                        <p>⭐ المعدل: ${student.average || 'غير متاح'}</p>
+                        <p>🏆 الترتيب: ${student.overall_rank || 'غير متاح'}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '❌ رقم الجلوس غير موجود';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '⚠️ خطأ في الاتصال، حاول مرة أخرى';
+                console.error(error);
+            }
+        }
+    </script>
 </body>
 </html>
-<script>
-function searchStudent() {
-    let id = document.getElementById('searchInput').value;
-    let students = {
-        "1234": {name: "أحمد محمد", average: "98.5"},
-        "5678": {name: "سارة علي", average: "95.2"}
-    };
-    let result = students[id];
-    document.getElementById('result').innerHTML = result ? 
-        `<h3>${result.name}</h3><p>المعدل: ${result.average}</p>` :
-        "❌ رقم غير صحيح";
-}
-</script>
