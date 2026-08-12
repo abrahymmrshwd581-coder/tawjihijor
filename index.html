@@ -1,44 +1,151 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نتائج التوجيهي</title>
     <style>
-        body { font-family: Arial; text-align: center; padding: 50px; }
-        input, button { padding: 10px; font-size: 18px; margin: 5px; }
-        #result { margin-top: 20px; padding: 15px; background: #f0f4f8; }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 450px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #1a3a5c;
+            font-size: 26px;
+            margin-bottom: 25px;
+        }
+        input {
+            width: 90%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: 0.3s;
+        }
+        input:focus {
+            border-color: #2d89ef;
+            outline: none;
+        }
+        button {
+            width: 95%;
+            padding: 14px;
+            background: #2d89ef;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #1a6dc1;
+            transform: scale(1.02);
+        }
+        #result {
+            margin-top: 25px;
+            padding: 20px;
+            background: #e8f0fe;
+            border-radius: 12px;
+            font-size: 18px;
+            min-height: 70px;
+            line-height: 1.8;
+        }
+        .error {
+            color: #d32f2f;
+        }
+        .success {
+            color: #1a3a5c;
+        }
     </style>
 </head>
 <body>
-    <h1>📊 نتيجة التوجيهي</h1>
-    <input type="text" id="searchInput" placeholder="أدخل رقم الجلوس">
-    <button onclick="searchStudent()">بحث</button>
-    <div id="result"></div>
+    <div class="container">
+        <h1>📊 نتيجة التوجيهي</h1>
+        <input type="text" id="searchInput" placeholder="أدخل رقم الجلوس" autofocus>
+        <button onclick="searchStudent()">🔍 بحث</button>
+        <div id="result">أدخل رقم الجلوس واضغط بحث</div>
+    </div>
 
     <script>
+        // 🔑 معلومات الاتصال بقاعدة البيانات (تأكد من صحتها)
         const supabaseUrl = 'https://bcoosbeidinimlicdqru.supabase.co';
-        sb_publishable_hh-9ou_UoqvgHxeYkBooEQ_Nir_6-R9
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjb29zYmVpZGluaW1saWNkcXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0NDY0MDAsImV4cCI6MjAzMTAyMjQwMH0.TdQwV2lP3qZ4rF7sH9jK1lM5nB8vC6xY0zW3eR7tU2';
+
+        // 📡 دالة البحث الرئيسية
         async function searchStudent() {
+            // 1. جلب رقم الجلوس من مربع الإدخال
             const seatNumber = document.getElementById('searchInput').value.trim();
             const resultDiv = document.getElementById('result');
-            if (!seatNumber) { resultDiv.innerHTML = '⚠️ أدخل رقم الجلوس'; return; }
+
+            // 2. التحقق من أن المستخدم أدخل رقمًا
+            if (!seatNumber) {
+                resultDiv.innerHTML = '⚠️ الرجاء إدخال رقم الجلوس';
+                return;
+            }
+
+            // 3. عرض رسالة "جاري البحث..."
             resultDiv.innerHTML = '⏳ جاري البحث...';
+
             try {
-                const res = await fetch(`${supabaseUrl}/rest/v1/students?seat_number=eq.${seatNumber}&select=*`, {
-                    headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-                });
-                const data = await res.json();
+                // 4. إرسال طلب إلى Supabase
+                const response = await fetch(
+                    `${supabaseUrl}/rest/v1/students?seat_number=eq.${seatNumber}&select=*`,
+                    {
+                        headers: {
+                            'apikey': supabaseKey,
+                            'Authorization': `Bearer ${supabaseKey}`
+                        }
+                    }
+                );
+
+                // 5. تحويل النتيجة إلى JSON
+                const data = await response.json();
+
+                // 6. عرض النتيجة للمستخدم
                 if (data && data.length > 0) {
-                    const s = data[0];
-                    resultDiv.innerHTML = `<h3>👤 ${s.name}</h3><p>📚 ${s.branch || ''}</p><p>⭐ ${s.average || ''}</p>`;
+                    const student = data[0];
+                    resultDiv.innerHTML = `
+                        <div style="text-align: right;">
+                            <h3 style="color: #1a3a5c; margin: 0 0 10px 0;">👤 ${student.name || 'غير معروف'}</h3>
+                            <p style="margin: 5px 0;">📚 الفرع: ${student.branch || 'غير محدد'}</p>
+                            <p style="margin: 5px 0;">⭐ المعدل: ${student.average || 'غير متاح'}</p>
+                            <p style="margin: 5px 0;">🏆 الترتيب: ${student.overall_rank || 'غير متاح'}</p>
+                        </div>
+                    `;
                 } else {
                     resultDiv.innerHTML = '❌ رقم الجلوس غير موجود';
                 }
-            } catch (e) {
-                resultDiv.innerHTML = '⚠️ خطأ في الاتصال';
+            } catch (error) {
+                // 7. معالجة أي خطأ
+                console.error('خطأ في الاتصال:', error);
+                resultDiv.innerHTML = '⚠️ خطأ في الاتصال، حاول مرة أخرى';
             }
         }
+
+        // 🚀 إضافة خاصية البحث عند الضغط على Enter
+        document.getElementById('searchInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                searchStudent();
+            }
+        });
     </script>
 </body>
 </html>
