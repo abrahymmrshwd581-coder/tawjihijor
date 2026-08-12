@@ -14,6 +14,7 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            direction: rtl;
         }
         .container {
             max-width: 450px;
@@ -71,6 +72,7 @@
     </div>
 
     <script>
+        // معلومات الاتصال بقاعدة البيانات - تأكد من صحة هذه المعلومات
         const supabaseUrl = 'https://bcoosbeidinimlicdqru.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjb29zYmVpZGluaW1saWNkcXJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTU0NDY0MDAsImV4cCI6MjAzMTAyMjQwMH0.TdQwV2lP3qZ4rF7sH9jK1lM5nB8vC6xY0zW3eR7tU2';
 
@@ -78,14 +80,17 @@
             const seatNumber = document.getElementById('searchInput').value.trim();
             const resultDiv = document.getElementById('result');
             
+            // التحقق من إدخال رقم الجلوس
             if (!seatNumber) {
                 resultDiv.innerHTML = '⚠️ الرجاء إدخال رقم الجلوس';
                 return;
             }
             
+            // عرض رسالة جاري البحث
             resultDiv.innerHTML = '⏳ جاري البحث...';
             
             try {
+                // طلب البحث من قاعدة البيانات
                 const response = await fetch(`${supabaseUrl}/rest/v1/students?seat_number=eq.${seatNumber}&select=*`, {
                     headers: {
                         'apikey': supabaseKey,
@@ -95,10 +100,11 @@
                 
                 const data = await response.json();
                 
-                if (data.length > 0) {
+                // عرض النتيجة إذا وجدت
+                if (data && data.length > 0) {
                     const student = data[0];
                     resultDiv.innerHTML = `
-                        <h3>👤 ${student.name}</h3>
+                        <h3>👤 ${student.name || 'غير معروف'}</h3>
                         <p>📚 الفرع: ${student.branch || 'غير محدد'}</p>
                         <p>⭐ المعدل: ${student.average || 'غير متاح'}</p>
                         <p>🏆 الترتيب: ${student.overall_rank || 'غير متاح'}</p>
@@ -107,8 +113,9 @@
                     resultDiv.innerHTML = '❌ رقم الجلوس غير موجود';
                 }
             } catch (error) {
+                // معالجة الأخطاء
+                console.error('Error:', error);
                 resultDiv.innerHTML = '⚠️ خطأ في الاتصال، حاول مرة أخرى';
-                console.error(error);
             }
         }
     </script>
